@@ -1,7 +1,7 @@
 node_modules/
 *.log
 qa/slides/
-deck/*/qa/
-deck/*/*.pdf
+deck/
+!deck/.gitkeep
 unpacked/
 .DS_Store
