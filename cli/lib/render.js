@@ -6,7 +6,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const CANDIDATES = {
   soffice: [
@@ -82,6 +84,22 @@ export function toolStatus() {
   return { soffice, pdftoppm, available: Boolean(soffice && pdftoppm) };
 }
 
+// Concurrent soffice invocations collide on LibreOffice's shared user profile
+// (seen as flaky conversions under `npm test`). Each call gets a private profile.
+export function withPrivateProfile(fn) {
+  const profile = path.join(os.tmpdir(), `deckto-lo-${crypto.randomUUID()}`);
+  const args = [`-env:UserInstallation=${pathToFileURL(profile).href}`];
+  try {
+    return fn(args);
+  } finally {
+    try {
+      fs.rmSync(profile, { recursive: true, force: true });
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
+}
+
 export function renderDeck(file, outDir) {
   const tools = toolStatus();
   if (!tools.soffice) {
@@ -95,9 +113,11 @@ export function renderDeck(file, outDir) {
   const abs = path.resolve(file);
   const tmpPdf = path.join(outDir, path.basename(abs, '.pptx') + '.pdf');
 
-  execFileSync(tools.soffice, ['--headless', '--convert-to', 'pdf', '--outdir', outDir, abs], {
-    stdio: 'ignore',
-    timeout: 180000,
+  withPrivateProfile((profileArgs) => {
+    execFileSync(tools.soffice, [...profileArgs, '--headless', '--convert-to', 'pdf', '--outdir', outDir, abs], {
+      stdio: 'ignore',
+      timeout: 180000,
+    });
   });
 
   execFileSync(tools.pdftoppm, ['-jpeg', '-r', '150', tmpPdf, path.join(outDir, 'slide')], {
