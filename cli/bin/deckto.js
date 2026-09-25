@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+// deckto CLI — argument router. Envelope contract: { ok, command, version, data, error }
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const pkg = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+
+const COMMANDS = {
+  init: () => import('../commands/init.js'),
+  doctor: () => import('../commands/doctor.js'),
+  qa: () => import('../commands/qa.js'),
+};
+
+function usage() {
+  return [
+    'deckto — AI skills pipeline for professional pitch decks',
+    '',
+    'Usage:',
+    '  deckto init <slug> [--json]        Scaffold deck/<slug>/ workspace',
+    '  deckto doctor [--json]             Check node, tools, and deck config',
+    '  deckto qa static <deck.pptx> [--json]   Static QA checks on a deck',
+    '  deckto qa report --findings <file> [--json]  Merge findings into qa-report.md',
+    '',
+    `deckto v${pkg.version}`,
+  ].join('\n');
+}
+
+const args = process.argv.slice(2);
+const wantsJson = args.includes('--json');
+const positional = args.filter((a) => !a.startsWith('--'));
+const [cmd, ...rest] = positional;
+
+async function main() {
+  if (!cmd || cmd === 'help' || cmd === '--help') {
+    process.stdout.write(usage() + '\n');
+    return 0;
+  }
+  const loader = COMMANDS[cmd];
+  if (!loader) {
+    process.stderr.write(`Unknown command: ${cmd}\n\n${usage()}\n`);
+    return 1;
+  }
+  try {
+    const mod = await loader();
+    return await mod.run(rest, { json: wantsJson, root: ROOT, version: pkg.version });
+  } catch (err) {
+    if (wantsJson) {
+      process.stdout.write(JSON.stringify({
+        ok: false, command: cmd, version: pkg.version, data: null,
+        error: String(err && err.message ? err.message : err),
+      }) + '\n');
+    } else {
+      process.stderr.write(`Error: ${err && err.message ? err.message : err}\n`);
+    }
+    return 1;
+  }
+}
+
+const code = await main();
+process.exit(code);
