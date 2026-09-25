@@ -11,6 +11,7 @@ const COMMANDS = {
   init: () => import('../commands/init.js'),
   doctor: () => import('../commands/doctor.js'),
   qa: () => import('../commands/qa.js'),
+  theme: () => import('../commands/theme.js'),
 };
 
 function usage() {
