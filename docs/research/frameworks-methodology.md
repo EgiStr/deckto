@@ -85,7 +85,7 @@ One controlling statement; every slide is a supporting argument keyed to it. Mec
 
 | Source | Claim supported | Tier / Access |
 |---|---|---|
-| Garner, Alley, Wolfe, Zappe, Sawarynski, *Assertion-Evidence Slides Apappear to Lead to Better Comprehension and Recall of More Complex Concepts*, ASEE 2011, DOI: [10.18260/1-2--17510](https://doi.org/10.18260/1-2--17510) | Slides with **assertion titles** (full-sentence claim) + supporting visual evidence produce better comprehension and recall than topic-title + text slides | `[A]` `open` (ASEE proceedings) |
+| Garner, Alley, Wolfe, Zappe, Sawarynski, *Assertion-Evidence Slides Appear to Lead to Better Comprehension and Recall of More Complex Concepts*, ASEE 2011, DOI: [10.18260/1-2--17510](https://doi.org/10.18260/1-2--17510) | Slides with **assertion titles** (full-sentence claim) + supporting visual evidence produce better comprehension and recall than topic-title + text slides | `[A]` `open` (ASEE proceedings) |
 
 **Skill mechanism:** every `storyline.md` slide title must be an **assertion** (states the point, not the label: "Churn drops 40% when onboarding is guided" — not "Results"). The `insight` field is the assertion-evidence companion: title asserts, insight explains the so-what, visual provides evidence. **This single paper underwrites rules 2 and 3 together.**
 
