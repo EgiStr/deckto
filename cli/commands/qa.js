@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { okEnvelope, failEnvelope, emit } from '../lib/envelope.js';
 import { runChecks } from '../lib/pptx-static.js';
+import { validateStoryline } from '../lib/storyline.js';
 
 function loadConfig(root) {
   return JSON.parse(fs.readFileSync(path.join(root, 'deckto.config.json'), 'utf8'));
@@ -22,6 +23,9 @@ export async function run(args, ctx) {
   }
   if (sub === 'render') {
     return qaRender(rest, ctx, command);
+  }
+  if (sub === 'storyline') {
+    return qaStoryline(rest, ctx, command);
   }
 
   const msg = 'qa requires a subcommand: static | render | report';
@@ -110,6 +114,36 @@ function qaReport(args, ctx, command) {
     ctx,
     `qa report — verdict ${verdict} (iteration ${iteration}/${maxIter})\n  directive: ${directive}\n  written: ${outPath}`,
   );
+}
+
+function qaStoryline(args, ctx, command) {
+  const file = args.find((a) => !a.startsWith('--') && !isFlagValue(args, a));
+  if (!file || !fs.existsSync(file)) {
+    const msg = `storyline file not found: ${file ?? '<none>'}`;
+    emit(failEnvelope(command, ctx.version, msg), ctx);
+    process.stderr.write(msg + '\n');
+    return 1;
+  }
+
+  const cfg = loadConfig(ctx.root);
+  const result = validateStoryline(file, cfg);
+  const data = { file: path.resolve(file), ...result };
+
+  const lines = [`QA storyline — ${result.slideCount} slide(s), ${result.errors.length} error(s)`];
+  for (const e of result.errors) {
+    lines.push(`  [${e.code}] ${e.slide ? `slide ${e.slide} ` : ''}— ${e.detail}`);
+  }
+  if (!result.errors.length) lines.push(`  PASS — master title: ${result.masterTitle}`);
+
+  emit(okEnvelope(command, ctx.version, data), ctx, lines.join('\n'));
+  return result.errors.length ? 1 : 0;
+}
+
+// A token is a flag VALUE (not a positional) if the previous arg is a flag that takes one.
+function isFlagValue(args, token) {
+  const i = args.indexOf(token);
+  if (i <= 0) return false;
+  return ['--out', '--findings'].includes(args[i - 1]);
 }
 
 async function qaRender(args, ctx, command) {

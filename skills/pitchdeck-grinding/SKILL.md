@@ -126,6 +126,13 @@ word count. Cut or trim — do not hand off and hope build catches it.
 **usecase-flow.md:** use-case table + mermaid flowchart (rendered later to
 `assets/flow.png` by `assets-generator`).
 
+**Phase 4 evidence rule:** a slide whose visual requires data the brief doesn't have
+(a use-of-funds donut with no allocation, a market slide with no market number)
+must NOT get invented values. Either (a) leave the data-bearing visual unfilled and
+put the question in the GATE 4 confirmation, or (b) swap the layout for one the
+available data can carry (a milestone bar instead of a donut). Never render a visual
+with fabricated slices.
+
 Then present the full storyline for **GATE 4**.
 
 ## Phase 5 — Handoff

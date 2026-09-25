@@ -34,6 +34,12 @@ https://www.duarte.com/blog/move-presentation-audience-with-story-techniques-in-
 - **Ends on `call-to-action`** — common and costly; the deck closes on your need.
 - **`new-bliss` before the ask** — the vision already landed, the ask feels like an afterthought.
 
+**Allowed judgment call:** a `what-is` slide *after* the opening block is fine when
+it serves tension alternation (each returns sets up the `what-could-be` that follows).
+The enforceable rules are the opening, the closing, and the pairing — not a rigid
+interleave. Reviewers may challenge a non-obvious tag sequence; be ready to state
+which tension each slide serves.
+
 ## Note on evidence
 
 The arc is `[BOOK/STANDARD]` (Duarte) plus practitioner reporting `[C]`. It is a
