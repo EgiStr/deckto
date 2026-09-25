@@ -29,8 +29,10 @@ function usage() {
 
 const args = process.argv.slice(2);
 const wantsJson = args.includes('--json');
-const positional = args.filter((a) => !a.startsWith('--'));
-const [cmd, ...rest] = positional;
+// Remove ONLY the command token; flags and their values must reach subcommands intact.
+const cmdIndex = args.findIndex((a) => !a.startsWith('--'));
+const cmd = cmdIndex >= 0 ? args[cmdIndex] : undefined;
+const rest = cmdIndex >= 0 ? args.filter((_, i) => i !== cmdIndex) : [];
 
 async function main() {
   if (!cmd || cmd === 'help' || cmd === '--help') {

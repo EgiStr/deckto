@@ -9,16 +9,19 @@ function loadConfig(root) {
 
 export async function run(args, ctx) {
   const command = 'qa';
-  const sub = args[0];
+  // Subcommand is the first non-flag token; everything after it (flags included) goes down intact.
+  const subIdx = args.findIndex((a) => !a.startsWith('--'));
+  const sub = subIdx >= 0 ? args[subIdx] : undefined;
+  const rest = args.filter((_, i) => i !== subIdx);
 
   if (sub === 'static') {
-    return qaStatic(args.slice(1), ctx, command);
+    return qaStatic(rest, ctx, command);
   }
   if (sub === 'report') {
-    return qaReport(args.slice(1), ctx, command);
+    return qaReport(rest, ctx, command);
   }
   if (sub === 'render') {
-    return qaRender(args.slice(1), ctx, command);
+    return qaRender(rest, ctx, command);
   }
 
   const msg = 'qa requires a subcommand: static | render | report';
