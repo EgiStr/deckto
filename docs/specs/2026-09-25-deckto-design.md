@@ -20,7 +20,7 @@ Every deck must satisfy four non-negotiable rules:
 |---|------|------------------------|
 | 1 | Must have a storyline | Slide spine exists in `storyline.md`; every slide has a narrative role; no orphan slides |
 | 2 | More visual than wordy | Per-slide body word budget (config); ≥1 visual element per slide; visual-to-text ratio checked |
-| 3 | Insight per slide, not just telling | Every slide has a non-empty `insight` field ("so what?"); vision pass judges insight vs. telling |
+| 3 | Insight per slide, not just telling | Every slide's speaker notes carry a non-empty `INSIGHT: <line>` (first line, see Stage 3 embedding); vision pass judges insight vs. telling |
 | 4 | Fonts readable from the back | Body ≥ 14pt, title ≥ 36pt (config); static XML check on every run |
 
 **Audience of this repo:** Claude Code / agent-skill users who want `pitchdeck-pitch-me` → finished deck. Shipped as a Claude Code plugin marketplace repo + an `npx` CLI. Language: **English** throughout (prompts/examples may be bilingual).
@@ -91,28 +91,50 @@ pitchdeck-pitch-me ──▶ pitchdeck-grinding ──▶ pitchdeck-build ──
 
 Each stage auto-invokes the next at handoff (pocketto convention), carrying artifacts forward. Any stage can be invoked standalone.
 
-### Stage 1 — `pitchdeck-pitch-me`
+### Stage 1 — `pitchdeck-pitch-me` (CORE selling skill #1: idea extraction)
 
-- **Ambiguity gate:** if the idea is underspecified (goal, audience, format, time budget, stakes unknown) → ask clarifying questions **before** any artifact work. One question at a time; multiple-choice preferred.
-- **Diverge → converge:** generate idea variants, converge on one direction with the user.
-- **Audience hook:** runs `audience-fit` → profiles audience (investor / board / technical client / general) → locks tone, depth, recommended slide count into `pitch.md`.
-- **Output:** `deck/<slug>/pitch.md` — idea, audience profile, constraints, success criteria. Assumption recorded explicitly in the doc: the term "prefer audiact-" from the original request was interpreted as **audience profiling** (`audience-fit`); if wrong, revise this stage.
+This stage and Stage 2 are the flagship capability: they **extract the idea from the user**, not wait for a polished brief. The AI drives a structured questioning framework until the idea is fully surfaced.
+
+**Question framework (phased, research-based):**
+
+| Phase | Theme | Example questions |
+|---|---|---|
+| A. Goal | Presentation purpose & decision | What's the goal of this presentation? What should the audience *do* after? What decision are you asking for? |
+| B. Audience | Who's in the room | Who is the audience (investor / board / technical client / general)? What do they already know? What's their skepticism? |
+| C. Idea core | The actual content | What's the idea in one sentence? What's the problem? Why now? What evidence do you have? |
+| D. Data readiness | Evidence state | Is the data ready? Where from? What's missing? May we research/estimate gaps (marked as such)? |
+| E. Assets | Existing material | Do you have existing assets (brand kit, logos, prior decks, charts)? Or must they be sourced/generated? What theme/visual direction? |
+| F. Constraints | Format & stakes | Time budget? Slide count? Format (internal memo vs. pitch vs. keynote)? |
+
+- Questioning methods cited in `references/`: Minto SCQA (goal-discovery structure), 5W1H completeness check, design-thinking discovery-interview practice, Socratic question discipline — each tiered per Section 5.
+- **Ambiguity gate:** phases A–F run *before* any artifact work; unknown items recorded explicitly as `unknown` in `pitch.md` (never silently filled). One question per turn; multiple-choice preferred.
+- **Diverge → converge:** generate idea variants when the idea core (C) is fuzzy, converge on one direction with the user.
+- **Audience hook:** runs `audience-fit` → locks tone, depth, recommended slide count.
+- **Output:** `deck/<slug>/pitch.md` — idea, audience profile, completed framework (A–F), data/asset inventory, constraints, success criteria. Assumption recorded explicitly: "prefer audiact-" from the original request was interpreted as **audience profiling** (`audience-fit`); if wrong, revise this stage.
 - **Handoff:** invokes `pitchdeck-grinding`.
 
-### Stage 2 — `pitchdeck-grinding`
+### Stage 2 — `pitchdeck-grinding` (CORE selling skill #2: idea → full-detail storyline)
+
+Grinds `pitch.md` into a **complete, build-ready** storyline — detailed enough that Stage 3 is near-mechanical transcription, not creative guesswork.
+
+**Master title (the narrative spine):** the first artifact is ONE master title — a single controlling statement the whole deck argues for (Minto pyramid main line). Every slide must trace back to it; a slide that doesn't support the master title is cut, not reworded. The master title is literally the deck title slide's headline.
 
 Produces four artifacts:
 
-1. **`storyline.md`** — slide-by-slide spine. Each slide entry:
+1. **`storyline.md`** — master title + slide-by-slide spine, every field written out in detail (no placeholders):
 
    ```yaml
+   master_title: "..."   # ONE controlling statement — spine of the whole deck
    - slide: 3
-     title: "..."
-     point: "..."        # the telling (what we say)
-     insight: "..."      # the so-what (mandatory, non-empty — empty insight = slide cut)
-     visual: "..."       # what the audience SEES (image/chart/diagram/callout)
-     evidence: "..."     # data/source backing the claim
-     layout: "stat-callout"   # from design-spec layout vocabulary
+     title: "..."           # final slide headline (assertion, not label)
+     point: "..."           # the telling (what we say)
+     insight: "..."         # the so-what (mandatory, non-empty — empty insight = slide cut)
+     body: "..."            # final copy as it will appear (within word budget)
+     visual: "..."          # what the audience SEES (image/chart/diagram/callout)
+     visual_source: "existing|generate|research"   # from pitch.md asset inventory
+     evidence: "..."        # data/source; "unknown" if phase-D marked it missing
+     layout: "stat-callout" # from design-spec layout vocabulary
+     notes_draft: "..."     # speaker-notes draft, carries the INSIGHT line (see Stage 3)
    ```
 
 2. **`design-spec.md`** — palette (dominance rule: 1 dominant 60–70% + 1–2 support + 1 accent), font pair, ONE visual motif carried across slides, per-slide layout choice. **Font-size floors locked here** (rule 4), before any build.
@@ -128,14 +150,15 @@ Produces four artifacts:
 - Runs `assets-generator` → charts (type chosen by data semantics), flowchart/diagram PNGs, icon rows, big-number stat callouts, before/after comparison columns → `assets/` + asset manifest linking assets → slides.
 - Builds `deck.pptx` via pptxgenjs (vendored `pptx` skill): applies `design-spec`, big-font rules (title ≥ 36pt, body ≥ 14pt, stat callouts 60pt+), visual-first layouts — never plain bullets on white.
 - Layout discipline (from pptx skill): vary layouts across slides, dark/light sandwich or committed dark theme, one motif, no accent lines under titles, 0.5" margins, consistent spacing.
-- Runs `humanizer` pass on slide copy + speaker notes (short-text profile).
+- **Insight embedding (Rule 3, mechanism):** every slide gets speaker notes whose **first line is exactly `INSIGHT: <storyline insight>`**, followed by the humanized `notes_draft`. `insight` lives in `ppt/notesSlideN.xml` — this is how Rule 3 becomes statically checkable (without it, the XML QA test is unimplementable). Invariants: build MUST write notes for every slide; the `INSIGHT:` first line is **frozen** — the humanizer pass rewrites notes content after line 1 only, never the marker or its text.
+- Runs `humanizer` pass on slide copy + speaker notes (short-text profile, `INSIGHT:` line exempt).
 - **Handoff:** invokes `pitchdeck-review`.
 
 ### Stage 4 — `pitchdeck-review`
 
 Hybrid QA (design approved as Approach A):
 
-1. **Static QA** — `npx deckto qa static deck.pptx`: parse slide XML → min font size per text frame, words/slide, bullet density, `insight`-marker presence, storyline slide coverage (every storyline slide exists in deck and vice versa).
+1. **Static QA** — `npx deckto qa static deck.pptx`: parse slide XML → min font size per text frame, words/slide, bullet density, **insight-marker presence (notes-slide first line `INSIGHT:` non-empty on every slide)**, storyline slide coverage (every storyline slide exists in deck and vice versa; every slide traces to the master title).
 2. **Render QA** — `npx deckto qa render deck.pptx`: soffice → pdf → jpg into `qa/slides/`; vision pass judges what XML can't: insight vs. telling, visual>wordy impression, contrast/legibility. Skipped with a warning if tools missing (gate then rests on static checks + explicit vision caveat).
 3. **Report** — `npx deckto qa report`: merge → `qa-report.md`, every finding scope-classified.
 
@@ -238,8 +261,9 @@ Every skill has a `references/` folder; `docs/research/` aggregates. **Two ortho
 - Minimum 3 scenarios per pipeline skill: application, edge-case, missing-info.
 
 **CLI tests (`node --test`):**
-- Known-bad fixtures: 10pt font → flagged; 40-word slide → flagged; slide without `insight` → flagged.
+- Known-bad fixtures: 10pt font → flagged; 40-word slide → flagged; slide whose notes lack the `INSIGHT:` first line → flagged; slide with `INSIGHT:` present but empty → flagged; slide not traceable to the master title → flagged.
 - Known-good fixture → zero findings.
+- Notes invariant: run fixtures through the build + humanizer path → `INSIGHT:` first line byte-identical before/after.
 - Loop-edge: findings with scopes → correct invalidation; 3rd iteration → `REVIEW_BLOCKED`.
 
 **End-to-end dogfood:** run `deckto` itself through all 4 stages → `qa-report.md` PASS → rendered slides visually inspected (subagent, pptx QA prompt). Becomes README demo deck.
