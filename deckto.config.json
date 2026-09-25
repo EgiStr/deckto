@@ -1,0 +1,16 @@
+{
+  "fonts": {
+    "minBodyPt": 14,
+    "minTitlePt": 36,
+    "statCalloutPt": 60
+  },
+  "words": {
+    "maxBodyPerSlide": 25
+  },
+  "visual": {
+    "minElementsPerSlide": 1
+  },
+  "review": {
+    "maxAutoIterations": 2
+  }
+}

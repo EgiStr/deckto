@@ -1,0 +1,7 @@
+node_modules/
+*.log
+qa/slides/
+deck/*/qa/
+deck/*/*.pdf
+unpacked/
+.DS_Store

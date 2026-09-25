@@ -1,0 +1,17 @@
+{
+  "name": "deckto",
+  "owner": {
+    "name": "EgiStr",
+    "url": "https://github.com/EgiStr"
+  },
+  "description": "AI skills pipeline for professional pitch decks — idea to QA-passed .pptx",
+  "plugins": [
+    {
+      "name": "deckto",
+      "source": { "source": "url", "url": "https://github.com/EgiStr/deckto.git" },
+      "description": "Gated skills that extract an idea, grind it into a storyline with insights, build a visual-first .pptx, and QA it against four non-negotiable rules.",
+      "category": "productivity",
+      "tags": ["pitch-deck", "pptx", "presentation", "storyline", "design", "brainstorming"]
+    }
+  ]
+}

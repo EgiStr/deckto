@@ -1,0 +1,28 @@
+{
+  "name": "deckto",
+  "version": "0.1.0",
+  "description": "Structured AI skills pipeline for professional pitch decks — from rough idea to QA-passed .pptx",
+  "type": "module",
+  "bin": {
+    "deckto": "cli/bin/deckto.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "keywords": [
+    "pptx",
+    "pitch-deck",
+    "claude-code",
+    "skills",
+    "presentation",
+    "storyline"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PLACEHOLDER/deckto.git"
+  }
+}

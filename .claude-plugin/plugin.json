@@ -1,0 +1,10 @@
+{
+  "name": "deckto",
+  "description": "AI skills pipeline for professional pitch decks: idea extraction, storylined grinding, visual-first build, and a hard QA gate for storyline, visual density, insights, and font size.",
+  "author": {
+    "name": "EgiStr",
+    "url": "https://github.com/EgiStr"
+  },
+  "repository": "https://github.com/EgiStr/deckto",
+  "keywords": ["pitch-deck", "pptx", "presentation", "storyline", "skills", "workflow"]
+}
