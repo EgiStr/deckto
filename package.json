@@ -23,7 +23,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PLACEHOLDER/deckto.git"
+    "url": "git+https://github.com/EgiStr/deckto.git"
+  },
+  "homepage": "https://github.com/EgiStr/deckto#readme",
+  "bugs": {
+    "url": "https://github.com/EgiStr/deckto/issues"
   },
   "dependencies": {
     "fflate": "^0.8.3",

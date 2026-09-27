@@ -80,8 +80,25 @@ function qaReport(args, ctx, command) {
 
   const cfg = loadConfig(ctx.root);
   const input = JSON.parse(fs.readFileSync(findingsPath, 'utf8'));
-  const findings = input.findings ?? [];
-  const iteration = input.iteration ?? 1;
+  // Accept both field-name pairs. Skills are told to emit `rule`/`evidence` (they read
+  // better in prose), while the renderer's table columns are `code`/`detail`. Normalize
+  // here so a skill-authored file never renders as "undefined" cells.
+  const findings = (input.findings ?? []).map((f) => ({
+    ...f,
+    code: f.code ?? f.rule ?? 'UNKNOWN',
+    detail: f.detail ?? f.evidence ?? '',
+  }));
+  // `--iterations` is documented by pitchdeck-review and must win over the file's
+  // `iteration` field. Ignoring it made the auto-iteration cap unreachable: an agent
+  // following the skill passed the flag, the CLI fell back to 1, and REVIEW_BLOCKED
+  // could never fire — the "bounded" loop was unbounded in practice.
+  const flagIteration = Number.parseInt(valueOf(args, '--iterations') ?? '', 10);
+  const iteration =
+    Number.isFinite(flagIteration) && flagIteration > 0
+      ? flagIteration
+      : Number.isFinite(input.iteration)
+        ? input.iteration
+        : 1;
   const maxIter = cfg.review.maxAutoIterations;
 
   const byScope = { storyline: [], assets: [], deck: [] };
@@ -143,7 +160,7 @@ function qaStoryline(args, ctx, command) {
 function isFlagValue(args, token) {
   const i = args.indexOf(token);
   if (i <= 0) return false;
-  return ['--out', '--findings'].includes(args[i - 1]);
+  return ['--out', '--findings', '--iterations'].includes(args[i - 1]);
 }
 
 async function qaRender(args, ctx, command) {
@@ -169,7 +186,7 @@ function renderReport({ findings, byScope, verdict, directive, iteration, maxIte
     `**Verdict:** ${verdict}`,
     `**Directive:** ${directive}`,
     `**Iteration:** ${iteration} of ${maxIter} auto-iterations`,
-    `**Deck:** ${input.file ?? '<unknown>'}`,
+    `**Deck:** ${input.file ?? input.deck ?? '<not given>'}`,
     `**Static findings:** ${findings.length}`,
     '',
   ].join('\n');

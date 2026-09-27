@@ -93,3 +93,82 @@ test('iterations within cap keep looping', () => {
   assert.equal(r.env.data.verdict, 'FAIL');
   assert.equal(r.env.data.directive, 'LOOP:pitchdeck-build');
 });
+
+// The review skill is documented to emit `rule`/`evidence` (they read better in prose),
+// while the renderer's native columns are `code`/`detail`. Before normalization, a
+// skill-authored file rendered every cell as literal "undefined" while still exiting 0 —
+// a silent contract break. Pin both spellings.
+test('skill contract: rule/evidence findings render without undefined cells', () => {
+  const dir = tmp();
+  report(
+    [{ scope: 'storyline', rule: 'INSIGHT_EMPTY', slide: 6, evidence: 'insight too trivial', fix: 'write a so-what' }],
+    1,
+    dir,
+  );
+  const md = fs.readFileSync(path.join(dir, 'qa-report.md'), 'utf8');
+  assert.match(md, /INSIGHT_EMPTY/);
+  assert.match(md, /insight too trivial/);
+  assert.match(md, /write a so-what/);
+  assert.doesNotMatch(md, /undefined/, 'no table cell may render as "undefined"');
+});
+
+test('renderer-native: code/detail findings still render', () => {
+  const dir = tmp();
+  report([F('FONTSIZE_LOW', 'deck')], 1, dir);
+  const md = fs.readFileSync(path.join(dir, 'qa-report.md'), 'utf8');
+  assert.match(md, /FONTSIZE_LOW/);
+  assert.doesNotMatch(md, /undefined/);
+});
+
+test('deck filename is reported, never left unknown when provided', () => {  const dir = tmp();
+  const findingsFile = path.join(dir, 'findings.json');
+  fs.writeFileSync(
+    findingsFile,
+    JSON.stringify({ file: 'deck/deckto-pitch/deck.pptx', iteration: 1, findings: [F('FONTSIZE_LOW', 'deck')] }),
+    'utf8',
+  );
+  execFileSync(process.execPath, [BIN, 'qa', 'report', '--findings', findingsFile, '--out', dir], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const md = fs.readFileSync(path.join(dir, 'qa-report.md'), 'utf8');
+  assert.match(md, /\*\*Deck:\*\* deck\/deckto-pitch\/deck\.pptx/);
+});
+
+// pitchdeck-review tells the agent to pass `--iterations <n>`. The flag was documented
+// but never read, so the cap fell back to 1 every time and REVIEW_BLOCKED was
+// unreachable — a bounded loop that never bounded.
+test('--iterations flag overrides the file field and can reach the cap', () => {
+  const dir = tmp();
+  const findingsFile = path.join(dir, 'findings.json');
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'deckto.config.json'), 'utf8'));
+  const over = cfg.review.maxAutoIterations + 1;
+  // File says iteration 1; the flag says otherwise. The flag must win.
+  fs.writeFileSync(
+    findingsFile,
+    JSON.stringify({ file: 'deck.pptx', iteration: 1, findings: [F('FONTSIZE_LOW', 'deck')] }),
+    'utf8',
+  );
+  const stdout = execFileSync(
+    process.execPath,
+    [BIN, 'qa', 'report', '--findings', findingsFile, '--iterations', String(over), '--out', dir, '--json'],
+    { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  );
+  const env = JSON.parse(stdout);
+  assert.equal(env.data.iteration, over, 'flag must set the iteration count');
+  assert.equal(env.data.verdict, 'BLOCKED');
+  assert.equal(env.data.directive, 'REVIEW_BLOCKED');
+});
+
+test('--iterations is not mistaken for a positional deck path', () => {
+  const dir = tmp();
+  const findingsFile = path.join(dir, 'findings.json');
+  fs.writeFileSync(findingsFile, JSON.stringify({ file: 'deck.pptx', findings: [] }), 'utf8');
+  const stdout = execFileSync(
+    process.execPath,
+    [BIN, 'qa', 'report', '--findings', findingsFile, '--iterations', '1', '--out', dir, '--json'],
+    { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  );
+  assert.equal(JSON.parse(stdout).data.iteration, 1);
+});

@@ -1,0 +1,92 @@
+# deckto
+
+> AI skills pipeline that turns a rough idea into a QA-passed professional .pptx pitch deck. Four gated skills (pitch-me -> grinding -> build -> review) plus a small Node CLI that runs the gates: deterministic static checks, a rendered vision pass, and WCAG contrast math.
+
+deckto exists because slide *design* is solved but slide *thinking* is not. Most decks fail on structure, not on ideas. Four rules are enforced as machine-checked gates rather than advice: (1) every deck has a storyline, (2) visual over words, (3) every slide carries an insight, not just narration, (4) fonts large enough to read from the back of the room.
+
+## Quick start
+
+- Install (CLI): `npx deckto init my-idea`
+- Install (skills): `git clone https://github.com/EgiStr/deckto`
+- Requirements: Node 18+. LibreOffice and Poppler are optional and only needed for `qa render` (the vision pass); `deckto doctor` reports which are missing.
+
+## Pipeline
+
+1. `pitchdeck-pitch-me` — extract the idea. One question per message, only for real ambiguity. Never invents facts.
+2. `pitchdeck-grinding` — grind the brief into a storyline: diverge on arcs, converge on one, then write a per-slide spine (assertion title, body, insight, evidence, layout).
+3. `pitchdeck-build` — build the .pptx with PptxGenJS; write `INSIGHT: <insight>` as the first line of every slide's speaker notes.
+4. `pitchdeck-review` — independent judgment; emits findings tagged with the scope that owns each defect.
+
+Each stage is fail-closed: it does not hand off until its gate passes.
+
+## Support skills
+
+- `audience-fit` — who is in the room -> tone, depth, evidence type, font floor, slide count. Standalone-capable.
+- `brand-design` — brand language -> mathematically validated palette and type scale. Standalone-capable.
+- `assets-generator` — generate genuine visuals; never fabricate data images.
+- `pptx` — general PowerPoint create/inspect/edit.
+- `humanizer` — remove AI writing tells without rewriting frozen insights.
+
+## QA model (the important part)
+
+Two layers, because static checks alone cannot see a broken deck:
+
+- Static: parses .pptx XML for font floors, word budgets, missing visuals, insight presence, arc integrity. Fast, deterministic, blind to appearance.
+- Render: `deckto qa render <deck.pptx> --out <dir>` converts pptx -> pdf -> one jpg per slide so a model can actually look at the result.
+
+Defects that passed static QA and were caught only by the render pass, during this repo's own dogfood deck: content clipped off-slide (16:9 layout with 13.33x7.5in coordinates), an invisible comparison panel (light stroke on light background), and every diagram drawn ~40px too low (SVG `<text y>` is a baseline, not a top edge). None were invalid files; all were broken decks. The baseline defect is now prevented structurally by `cli/lib/svg-geometry.js` plus regression tests.
+
+## Scoped findings and bounded loops
+
+Findings carry `scope` so the loop routes each defect to the skill that owns it:
+
+- `storyline` -> `LOOP:pitchdeck-grinding` (dominates: a rebuild cannot fix a bad argument)
+- `assets` -> `LOOP:pitchdeck-build`
+- `deck` -> `LOOP:pitchdeck-build`
+
+After `review.maxAutoIterations` (default 2) the verdict becomes `REVIEW_BLOCKED` and remaining findings are handed to the human instead of looping forever.
+
+Findings file shape:
+
+```json
+{
+  "file": "deck/my-idea/deck.pptx",
+  "iteration": 1,
+  "findings": [
+    { "scope": "assets", "rule": "STRIP_COLLISION", "slide": 5,
+      "evidence": "terminal block bottom edge overlaps the caption by 12px",
+      "fix": "shorten the block so it clears the caption band" }
+  ]
+}
+```
+
+Both `rule`/`evidence` and `code`/`detail` field spellings are accepted.
+
+## CLI
+
+- `deckto init <slug>` — scaffold deck/<slug>/
+- `deckto doctor` — check node, LibreOffice, Poppler, config
+- `deckto qa storyline <file.md>` — structural checks on a storyline
+- `deckto qa static <deck.pptx>` — static XML checks
+- `deckto qa render <deck.pptx> --out <dir>` — rendered vision pass
+- `deckto qa report --findings <f> --iterations <n> [--out <dir>]` — merge findings, decide the loop
+- `deckto theme contrast <fg> <bg>` — WCAG contrast ratio
+- `deckto theme adjust|ramp|dominance` — derive and validate a palette
+- `deckto assets render <file.svg>` — SVG to PNG (LibreOffice headless)
+
+Every command accepts `--json` and returns `{ ok, command, version, data, error }`.
+
+## Layout contract
+
+The .pptx and its image assets carry distinct bands and must not duplicate each other: the pptx carries the title (selectable, QA-checked), footer, and speaker notes; the 1232x460 SVG strip carries the body line and the diagram. Three composition rules apply: the strip never competes with the title, content sits in a fixed vertical rhythm (TOP=120 .. BOT=410, caption at 422), and any filled block must end above the caption band.
+
+## Configuration
+
+`deckto.config.json` holds `fonts.minBodyPt` (14), `fonts.minTitlePt` (36), `fonts.statCalloutPt` (60), `words.maxBodyPerSlide` (25), `visual.minElementsPerSlide` (1), `review.maxAutoIterations` (2).
+
+## Optional
+
+- `docs/research/frameworks-methodology.md` — the methodology source map with citations behind each skill
+- `docs/specs/` — design spec and implementation plan
+- `deck/deckto-pitch/` — the dogfood deck: this repo's own pitch, built by these skills
+- `npm test` — 75 tests via node:test

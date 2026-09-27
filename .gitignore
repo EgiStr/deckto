@@ -1,7 +1,19 @@
 node_modules/
 *.log
-qa/slides/
-deck/
-!deck/.gitkeep
 unpacked/
 .DS_Store
+
+# Decks are generated per user into deck/<slug>/. The built artifacts (pptx, SVG/PNG
+# assets, render QA output) are outputs and stay untracked — but the hand-authored
+# sources must be tracked, or a fresh clone cannot regenerate the shipped dogfood deck.
+deck/**
+!deck/.gitkeep
+!deck/*/
+!deck/*/storyline.md
+!deck/*/design-spec.md
+!deck/*/usecase-flow.md
+!deck/*/pitch.md
+deck/*/assets/
+deck/*/qa/
+deck/*/deck.pptx
+deck/*/*.pptx
