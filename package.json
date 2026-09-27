@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "description": "Structured AI skills pipeline for professional pitch decks — from rough idea to QA-passed .pptx",
   "type": "module",
+  "files": [
+    "cli/",
+    "skills/",
+    "deckto.config.json",
+    "README.md",
+    "llms.txt",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "bin": {
     "deckto": "cli/bin/deckto.js"
   },
@@ -16,9 +25,13 @@
     "pptx",
     "pitch-deck",
     "claude-code",
+    "claude-plugin",
+    "agent-skills",
     "skills",
     "presentation",
-    "storyline"
+    "storyline",
+    "deck",
+    "pptxgenjs"
   ],
   "license": "MIT",
   "repository": {
