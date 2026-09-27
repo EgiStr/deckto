@@ -24,22 +24,63 @@ const TEMPLATES = {
 ## Success criteria
 - <what a good outcome looks like>
 `,
+  // The scaffold must pass `deckto qa storyline` as written — a new user's first
+  // command pair (init -> qa storyline) is the onboarding path, and it used to fail
+  // three ways: the bare `- slide:` list was invalid YAML after a mapping key,
+  // visual_source held a pipe-joined menu instead of one enum member, and a single
+  // slide could not satisfy the arc rule that a deck closes on new-bliss.
   'storyline.md': `master_title: "<ONE controlling statement — the spine of the whole deck>"
 
 # Storyline
 # Arc tags: what-is | what-could-be | call-to-action | new-bliss
+# The deck opens on what-is and closes on new-bliss (never on the ask).
+# These four slides are structural placeholders: replace the copy, keep the shape.
 
-- slide: 1
-  title: "<assertion, not a label>"
-  point: "<what we say>"
-  insight: "<the so-what — mandatory>"
-  body: "<final on-slide copy, within word budget>"
-  visual: "<what the audience SEES>"
-  visual_source: "existing|generate|research"
-  evidence: "<data/source, or unknown>"
-  layout: "<layout id from design-spec>"
-  arc: "what-is"
-  notes_draft: "<speaker notes; INSIGHT line added at build>"
+slides:
+  - slide: 1
+    title: "<assertion stating the problem, not a label>"
+    point: "<what we say — the current reality the audience agrees with>"
+    insight: "<the so-what for this audience — must be concrete>"
+    body: "<final on-slide copy, within word budget>"
+    visual: "<what the audience SEES>"
+    visual_source: "generate"
+    evidence: "<data/source, or unknown>"
+    layout: "title-dark"
+    arc: "what-is"
+    notes_draft: "<speaker notes; the INSIGHT line is added at build>"
+  - slide: 2
+    title: "<assertion stating what changes>"
+    point: "<what we say — the answer to slide 1's tension>"
+    insight: "<the so-what for this audience — must be concrete>"
+    body: "<final on-slide copy, within word budget>"
+    visual: "<what the audience SEES>"
+    visual_source: "generate"
+    evidence: "<data/source, or unknown>"
+    layout: "comparison-columns"
+    arc: "what-could-be"
+    notes_draft: "<speaker notes; the INSIGHT line is added at build>"
+  - slide: 3
+    title: "<assertion asking for one specific action>"
+    point: "<what we say — the single thing to do next>"
+    insight: "<the so-what for this audience — must be concrete>"
+    body: "<final on-slide copy, within word budget>"
+    visual: "<what the audience SEES>"
+    visual_source: "generate"
+    evidence: "<data/source, or unknown>"
+    layout: "flow-diagram"
+    arc: "call-to-action"
+    notes_draft: "<speaker notes; the INSIGHT line is added at build>"
+  - slide: 4
+    title: "<assertion describing the world after adoption>"
+    point: "<what we say — life with the idea in place>"
+    insight: "<the so-what for this audience — must be concrete>"
+    body: "<final on-slide copy, within word budget>"
+    visual: "<what the audience SEES>"
+    visual_source: "generate"
+    evidence: "<data/source, or unknown>"
+    layout: "title-dark"
+    arc: "new-bliss"
+    notes_draft: "<speaker notes; the INSIGHT line is added at build>"
 `,
   'design-spec.md': `# Design Spec
 

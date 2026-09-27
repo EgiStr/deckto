@@ -50,6 +50,29 @@ test('deckto init rejects a bad slug', () => {
   assert.notEqual(res.code, 0);
 });
 
+// A fresh scaffold is a user's first command pair: init -> qa storyline. It used to
+// fail three ways at once — invalid YAML (a bare sequence after a mapping key),
+// visual_source holding "existing|generate|research" instead of one enum member, and
+// a single slide unable to satisfy the arc rule that a deck closes on new-bliss.
+// The scaffold must be QA-clean as written.
+test('a freshly scaffolded storyline passes qa storyline', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'deckto-init-qa-'));
+  const init = run(['init', 'fresh-deck'], tmp);
+  assert.equal(init.code, 0, `init failed: ${init.stderr}`);
+  const res = run(['qa', 'storyline', 'deck/fresh-deck/storyline.md'], tmp);
+  assert.equal(res.code, 0, `scaffolded storyline failed QA:\n${res.stdout}${res.stderr}`);
+  assert.match(res.stdout, /PASS/);
+});
+
+test('the scaffold carries all four arc roles so the arc shape rule can pass', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'deckto-init-arc-'));
+  run(['init', 'arc-deck'], tmp);
+  const raw = fs.readFileSync(path.join(tmp, 'deck', 'arc-deck', 'storyline.md'), 'utf8');
+  for (const arc of ['what-is', 'what-could-be', 'call-to-action', 'new-bliss']) {
+    assert.match(raw, new RegExp(`arc: "${arc}"`), `scaffold missing arc ${arc}`);
+  }
+});
+
 test('deckto doctor reports tool availability and deck config', () => {
   const res = run(['doctor', '--json']);
   assert.equal(res.code, 0, `doctor failed: ${res.stderr}`);

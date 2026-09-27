@@ -5,7 +5,8 @@ unpacked/
 
 # Decks are generated per user into deck/<slug>/. The built artifacts (pptx, SVG/PNG
 # assets, render QA output) are outputs and stay untracked — but the hand-authored
-# sources must be tracked, or a fresh clone cannot regenerate the shipped dogfood deck.
+# sources must be tracked, or a fresh clone cannot regenerate the deck. theme.json is
+# an authored input too: it carries the contrast-validated palette make-assets.js reads.
 deck/**
 !deck/.gitkeep
 !deck/*/
@@ -13,6 +14,7 @@ deck/**
 !deck/*/design-spec.md
 !deck/*/usecase-flow.md
 !deck/*/pitch.md
+!deck/*/theme.json
 deck/*/assets/
 deck/*/qa/
 deck/*/deck.pptx
