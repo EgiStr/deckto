@@ -311,11 +311,19 @@ function chartFocus(s, d) {
 function statCallout(s, d) {
   const ink = D.light;
   const statSize = 89;
+  const labelSize = 30;
+  const lineHeight = 1.22;
+  // The tail cannot sit at a fixed y: statLabel wraps to 1, 2 or 3 lines depending on
+  // the copy, and a hard-coded 350 collided with the second line (caught in the render
+  // pass, invisible to static QA). Derive the tail's top from the wrapped label height.
+  const labelLines = d.statLabel ? wrap(d.statLabel, labelSize, 1160).length : 0;
+  const labelBottom = 285 + labelLines * labelSize * lineHeight;
+  const tailY = Math.max(350, Math.ceil(labelBottom + 12));
   return svg(`
   <line x1="16" y1="${TOP}" x2="1216" y2="${TOP}" stroke="${ink}" stroke-width="2" opacity="0.35"/>
   ${label(16, 160, d.stat, { size: statSize, weight: 'bold', color: D.accent })}
-  ${d.statLabel ? wrapLabel(16, 285, d.statLabel, 30, ink, 1160) : ''}
-  ${d.tail ? wrapLabel(16, 350, d.tail, 26, ink, 1160) : ''}
+  ${d.statLabel ? wrapLabel(16, 285, d.statLabel, labelSize, ink, 1160) : ''}
+  ${d.tail ? wrapLabel(16, tailY, d.tail, 26, ink, 1160) : ''}
   ${caption(s.slide, ink)}`, true);
 }
 

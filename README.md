@@ -198,10 +198,10 @@ Raise the font floors if your room is bigger than the default assumes.
 ## Development
 
 ```bash
-npm test        # 75 tests, node:test — no test framework
+npm test        # 77 tests, node:test — no test framework
 ```
 
-The dogfood deck in `deck/deckto-pitch/` is this repo's own pitch, built by these skills. Its hand-authored `storyline.md` and `design-spec.md` are tracked; the generated `.pptx`, assets, and renders are not — regenerate them with `scripts/make-dogfood-assets.js` and `scripts/build-dogfood.js`.
+The dogfood deck in `deck/deckto-pitch/` is this repo's own pitch, built by these skills. Its hand-authored `storyline.md`, `design-spec.md`, and `theme.json` are tracked; the generated `.pptx`, assets, and renders are not — regenerate them with `node scripts/make-assets.js deckto-pitch` then `node scripts/build-deck.js deckto-pitch`.
 
 ## License
 

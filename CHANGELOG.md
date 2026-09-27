@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **One deck generator, not two.** `scripts/make-assets.js` and `scripts/build-deck.js` now build any deck from `deck/<slug>/storyline.md` + `theme.json`, so the deck-#1-specific `scripts/make-dogfood-assets.js` and `scripts/build-dogfood.js` are gone. `deck/deckto-pitch/` gained the `theme.json` and per-slide `diagram:` blocks it needs to build through the generic path, and was regenerated and visually re-verified.
+
+### Fixed
+
+- **`stat-callout` tail collided with its own label.** The context line sat at a hard-coded `y=350`, so any `statLabel` that wrapped to two lines was overlapped by the `tail` line beneath it. The tail's position now derives from the wrapped label's height. Caught in the render pass; the file was valid and static QA passed.
+
 ## [0.1.0] — 2026-09-27
 
 First public release. The full pipeline from rough idea to a QA-passed `.pptx`, plus the CLI that makes its gates actually run.

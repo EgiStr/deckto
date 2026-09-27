@@ -89,4 +89,4 @@ The .pptx and its image assets carry distinct bands and must not duplicate each 
 - `docs/research/frameworks-methodology.md` — the methodology source map with citations behind each skill
 - `docs/specs/` — design spec and implementation plan
 - `deck/deckto-pitch/` — the dogfood deck: this repo's own pitch, built by these skills
-- `npm test` — 75 tests via node:test
+- `npm test` — 77 tests via node:test

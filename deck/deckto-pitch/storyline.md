@@ -11,6 +11,8 @@ slides:
     layout: "title-dark"
     arc: "what-is"
     notes_draft: "Open on the gap between how much founders care about the idea and how little structure they apply to the deck."
+    diagram:
+      sub: "the argument was never written down in the first place"
   - slide: 2
     title: "Pretty slides still fail when the argument is missing"
     point: "Design tools optimize appearance, not argument"
@@ -22,6 +24,16 @@ slides:
     layout: "comparison-columns"
     arc: "what-is"
     notes_draft: "Name the gap: tooling got good at looks and stayed silent on logic."
+    diagram:
+      columns:
+        - heading: "Polished"
+          lines:
+            - "layout · colour · type"
+            - "solved"
+        - heading: "Arguing"
+          lines:
+            - "claim · evidence · so-what"
+            - "not solved"
   - slide: 3
     title: "Every slide needs a claim the audience could disagree with"
     point: "Assertion titles beat label titles for comprehension"
@@ -33,6 +45,16 @@ slides:
     layout: "comparison-columns"
     arc: "what-could-be"
     notes_draft: "Show a real label title next to its assertion rewrite."
+    diagram:
+      columns:
+        - heading: "Label title"
+          lines:
+            - "\"Market\""
+            - "states nothing"
+        - heading: "Assertion title"
+          lines:
+            - "\"We start one crop\""
+            - "states a claim"
   - slide: 4
     title: "deckto makes the argument structurally unavoidable"
     point: "Two core skills extract the idea, then grind it into a storyline"
@@ -44,6 +66,12 @@ slides:
     layout: "flow-diagram"
     arc: "what-could-be"
     notes_draft: "Walk the two flagship skills and what each refuses to let you skip."
+    diagram:
+      steps:
+        - label: "pitch-me"
+          sub: "extract the idea"
+        - label: "grinding"
+          sub: "grind into a spine"
   - slide: 5
     title: "The storyline is checked by machine, not by mood"
     point: "Master title, insight, word budget and arc shape are validated"
@@ -55,6 +83,12 @@ slides:
     layout: "chart-focus"
     arc: "what-could-be"
     notes_draft: "Show a real failing finding and the fix it demands."
+    diagram:
+      checklist:
+        - "$ npx deckto qa storyline deck/x/storyline.md"
+        - "[INSIGHT_EMPTY] slide 6 — trivial (7 chars < 10)"
+        - "fix: write a real so-what, or cut the slide"
+        - "exit 1 — handoff blocked until fixed"
   - slide: 6
     title: "Every generated slide carries its own insight, frozen in the notes"
     point: "The INSIGHT line is written at build and never rewritten"
@@ -66,6 +100,14 @@ slides:
     layout: "icon-rows"
     arc: "what-could-be"
     notes_draft: "Explain the freeze and why humanizer is bounded by it."
+    diagram:
+      rows:
+        - label: "written at build time"
+          note: "transcribed from the storyline, never invented here"
+        - label: "first line of the notes"
+          note: "INSIGHT: <the insight> — a parseable contract"
+        - label: "never rewritten"
+          note: "copy can be re-voiced; the insight cannot"
   - slide: 7
     title: "Readability is a floor in a config file, not a preference"
     point: "Font floors are config-driven and checked on every build"
@@ -77,6 +119,10 @@ slides:
     layout: "stat-callout"
     arc: "what-could-be"
     notes_draft: "Give the honest caveat: floors are convention, not lab science."
+    diagram:
+      stat: "36/14"
+      statLabel: "pt minimum title and body — set in deckto.config.json, checked on every build"
+      tail: "honest caveat: these floors are convention, not lab science"
   - slide: 8
     title: "Deck review sends each defect to the skill that owns it"
     point: "Findings carry scope so the loop routes correctly"
@@ -88,6 +134,14 @@ slides:
     layout: "flow-diagram"
     arc: "what-could-be"
     notes_draft: "Walk storyline vs assets vs deck scopes and the 2-iteration cap."
+    diagram:
+      steps:
+        - label: "storyline"
+          sub: "back to grinding"
+        - label: "assets"
+          sub: "assets-generator"
+        - label: "deck"
+          sub: "back to build"
   - slide: 9
     title: "The whole pipeline runs on plain Node and two open tools"
     point: "No cloud, no account, no proprietary service"
@@ -99,6 +153,14 @@ slides:
     layout: "icon-rows"
     arc: "what-could-be"
     notes_draft: "Say the tradeoff: render QA needs LibreOffice and Poppler installed."
+    diagram:
+      rows:
+        - label: "Node 18+"
+          note: "required — the only hard dependency"
+        - label: "LibreOffice"
+          note: "optional — needed only for the render QA pass"
+        - label: "Poppler"
+          note: "optional — turns the rendered pdf into per-slide images"
   - slide: 10
     title: "Install it from the plugin marketplace in one line"
     point: "Skills install through the standard plugin path or npx"
@@ -110,6 +172,11 @@ slides:
     layout: "chart-focus"
     arc: "call-to-action"
     notes_draft: "Show the real command from the README."
+    diagram:
+      checklist:
+        - "$ npx deckto init my-idea"
+        - "deck/<slug>/ with pitch, storyline, design-spec"
+        - "or install the plugin — all 8 skills"
   - slide: 11
     title: "Pitch, grind, build, review — the loop that will not ship a deck without a spine"
     point: "The four-stage pipeline is the product"
@@ -121,6 +188,16 @@ slides:
     layout: "flow-diagram"
     arc: "new-bliss"
     notes_draft: "Close on the world where decks argue by default."
+    diagram:
+      steps:
+        - label: "pitch"
+          sub: "extract"
+        - label: "grind"
+          sub: "structure"
+        - label: "build"
+          sub: "transcribe"
+        - label: "review"
+          sub: "verify"
   - slide: 12
     title: "The argument is the design"
     point: "Deckto treats the claim as the primary artifact"
@@ -132,3 +209,5 @@ slides:
     layout: "title-dark"
     arc: "new-bliss"
     notes_draft: "End on the thesis, not on a request."
+    diagram:
+      sub: "the claim is the primary artifact — visuals serve it"
