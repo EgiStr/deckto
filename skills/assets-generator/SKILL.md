@@ -1,6 +1,6 @@
 ---
 name: assets-generator
-description: Use when a storyline references visuals that do not exist yet — generate SVG diagrams (flow, timeline, funnel, comparison), render them to PNG, and assemble the asset manifest for pitchdeck-build. Trigger on "generate assets", "create the diagram", "make flow.png", when design-spec references assets/ paths, or when assets-generator is invoked by pitchdeck-build for visual_source: generate. Do NOT use for assets marked existing (collect those first) or research (search instead).
+description: "Use when a storyline references visuals that do not exist yet — generate SVG diagrams (flow, timeline, funnel, comparison), render them to PNG, and assemble the asset manifest for pitchdeck-build. Trigger on \"generate assets\", \"create the diagram\", \"make flow.png\", when design-spec references assets/ paths, or when assets-generator is invoked by pitchdeck-build for visual_source: generate. Do NOT use for assets marked existing (collect those first) or research (search instead)."
 ---
 
 # Assets Generator — visuals from the storyline
