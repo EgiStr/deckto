@@ -50,7 +50,7 @@ GATE 5: `npx deckto qa static <file>` passes (0 errors) before handoff.
 2. read deck/<slug>/design-spec.md                      # palette, fonts, motif, layout map
 3. read deck/<slug>/assets/manifest.json                # GATE 2 — every generate/research asset present
 4. read deckto.config.json                              # GATE 4 thresholds
-5. read skills/pptx/SKILL.md → skills/pptx/pptxgenjs.md # real API + pitfalls, do not freestyle
+5. read ../pptx/SKILL.md → ../pptx/pptxgenjs.md          # real API + pitfalls, do not freestyle
 ```
 
 ## Phase 1 — Theme constants
@@ -90,7 +90,7 @@ slide.addNotes(`INSIGHT: ${s.insight}\n\n${s.notes_draft}`);
 
 Notes **start** with `INSIGHT: ` exactly — the static QA parses this line; a variation
 (`Insight:`, second line, empty) fails the gate. The humanizer may later rewrite
-everything after line 1 and never line 1 itself (documented in `skills/humanizer/SKILL.md`
+everything after line 1 and never line 1 itself (documented in `../humanizer/SKILL.md`
 deckto profile).
 
 ## Phase 4 — Generate, QA, iterate
@@ -124,6 +124,6 @@ before GATE 5 evidence (QA output) has been shown.
 ## Honesty note
 
 pptxgenjs coordinates are in inches (13.333×7.5 for 16:9) — read layout dimensions from
-`skills/pptx/pptxgenjs.md`, which also documents pitfall behavior (text overflow,
+`../pptx/pptxgenjs.md`, which also documents pitfall behavior (text overflow,
 image aspect ratios). The deckto thresholds are conventions recorded in config, not
 claims about projector science — say so if a user asks.
