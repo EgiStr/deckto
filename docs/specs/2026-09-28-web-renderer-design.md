@@ -37,7 +37,7 @@ and does not add web-only interactivity (click-builds, live data) in v1.
 | 2 | Emit a single self-contained `index.html` | Zero `node_modules`, zero build step, opens by double-click, deploys by copying one file. Fits the `npx` priority. |
 | 3 | Renderer lives in `cli/`, not `scripts/` | `scripts/` is **absent from the npm `files` allowlist** — a consumer running `npx deckto` cannot reach it. Putting the renderer in `cli/` makes it actually shippable. |
 | 4 | Responsive re-layout, **not** embedding the PNG strips | The strips are fixed 1232×460; embedding them would defeat reflow. The `diagram` block is re-rendered as HTML/CSS from the same data. |
-| 5 | Assets inlined as base64 data URIs | Guarantees the single-file property survives being emailed or moved. |
+| 5 | ~~Assets inlined as base64 data URIs~~ **retired** | Assumed slides carry image paths; they do not (see §3 note). Nothing to inline. |
 
 ## 3. Architecture
 
@@ -45,13 +45,20 @@ and does not add web-only interactivity (click-builds, live data) in v1.
 deck/<slug>/storyline.md ─┐
 deck/<slug>/theme.json ───┼─► cli/lib/web-renderer.js ─► deck/<slug>/web/index.html
 deckto.config.json ───────┘         (pure function)
-deck/<slug>/assets/* ─────────────►   └─ inlined base64
 ```
 
 The renderer is a **pure function**: same inputs, same bytes out. No network,
-no globbing beyond the deck directory, no mutation of inputs. That makes it
-testable without a browser and keeps it symmetrical with `scripts/build-deck.js`
+no file reading of its own, no mutation of inputs. That makes it testable
+without a browser and keeps it symmetrical with `scripts/build-deck.js`
 (the pptx path is likewise a transcription, not an invention).
+
+**Correction (implementation-time, 2026-09-28).** Decision 5 originally read
+"assets inlined as base64", assuming a slide carried an image path. It does not:
+`visual` is prose describing intent, and `visual_source` is a directive to
+`assets-generator`, not a filename. `deck/<slug>/assets/` contains only the
+generated 1232×460 strips, which decision 4 already excludes. There is therefore
+nothing to inline, and `assets/` is **not** a renderer input. Decision 5 is
+retired, not deferred — Phase 1 reads three files and emits one.
 
 ### 3.1 Layout → responsive component map
 
@@ -78,8 +85,9 @@ Every slide renders:
 
 1. **title** — from `slide.title`, `clamp()` scaled, floor enforced by
    `deckto.config.json` `fonts.minTitlePt` → equivalent `rem` floor
-2. **visual** — re-laid-out from `diagram` (§3.1)
-3. **body** — `slide.body`, `clamp()` with `minBodyPt` floor
+2. **body** — `slide.body`, `clamp()` with `minBodyPt` floor. Sits directly
+   under the title, matching the strip rhythm the pptx path already establishes.
+3. **visual** — re-laid-out from `diagram` (§3.1), below the body copy
 4. **insight** — rendered inside each slide's collapsible notes panel (a
    `<details>` element, closed by default) as the first line
    `INSIGHT: <insight>`, preserving the pptx speaker-notes contract. It is
@@ -97,8 +105,7 @@ The `body` ≤25-word budget and arc validation are already enforced upstream by
 | missing `deckto.config.json` | exit 1, `missing <path>` (needed for font floors) |
 | unknown `layout` | exit 1, `slide N: unknown layout "<x>" for web renderer` |
 | layout present, `diagram` block absent | exit 1, `slide N: missing diagram block for layout "<x>"` |
-| `assets/` image referenced but absent | exit 1, `missing <path>` |
-| font floor below `deckto.config.json` | warning on stderr, still emits |
+| config `fonts` block missing or non-numeric | warning on stderr, fall back to defaults (36pt title / 14pt body), still emits |
 
 Errors use the existing envelope contract (`{ ok, command, version, data,
 error }`) when `--json` is passed.
