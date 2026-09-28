@@ -293,3 +293,40 @@ test('chart-focus bars scale each fill against the largest value', () => {
   assert.match(barsOut, /--w:50\.0%/, 'half the value is half the width');
   assert.ok(barsOut.includes('~10k tokens'), 'caption renders');
 });
+
+// The accent is two-tier because the bright brand accent is illegible on a light
+// field (#F5A524 on #F1F5FE is 1.87:1). Without this the visible accent silently
+// disappears on every non-dark slide — which is how the bug shipped.
+test('the accent switches per field so it stays legible', () => {
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+  assert.match(
+    css,
+    /--accent-live:\s*var\(--accent-light\)/,
+    'the default field uses the dark accent variant'
+  );
+  assert.match(
+    css,
+    /\.slide--dark\s*\{[^}]*--accent-live:\s*var\(--accent\)/,
+    'dark slides re-point the accent at the bright variant'
+  );
+  // Exactly one override: a second one means some other rule re-points the accent.
+  assert.equal((css.match(/var\(--accent\)/g) ?? []).length, 1, 'only .slide--dark overrides');
+});
+
+// The light-field / dark-field decision lives in build.js for the pptx, which
+// darkens title-dark AND stat-callout. The web renderer darkened only the first,
+// so the same slide read dark in the deck and light on the web. Which of the two
+// is right is a design call, not a test's; what the test fixes is that they agree.
+test('both renderers agree on which layouts are dark', () => {
+  const build = fs.readFileSync(path.join(ROOT, 'cli', 'commands', 'build.js'), 'utf8');
+  const pptxDark = build.match(/const dark = (.*);/)[1];
+  const renderer = fs.readFileSync(path.join(ROOT, 'cli', 'lib', 'web-renderer.js'), 'utf8');
+  const webDark = renderer.match(/const dark = (.*);/)[1];
+
+  const layoutsOf = (expr) => [...expr.matchAll(/'([a-z-]+)'/g)].map((m) => m[1]).sort();
+  assert.deepEqual(
+    layoutsOf(webDark),
+    layoutsOf(pptxDark),
+    `web renderer darkens [${layoutsOf(webDark)}] but the pptx darkens [${layoutsOf(pptxDark)}]`
+  );
+});

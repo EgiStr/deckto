@@ -37,7 +37,7 @@ Each stage is fail-closed: it does not hand off until its gate passes.
 
 Two layers, because static checks alone cannot see a broken deck:
 
-- Static: parses .pptx XML for font floors, word budgets, missing visuals, insight presence, arc integrity. Fast, deterministic, blind to appearance.
+- Static: parses .pptx XML for font floors, word budgets, missing visuals, insight presence, arc integrity. Fast, deterministic, blind to appearance. `deckto qa web` applies the same four rules to the rendered HTML — same finding codes, same scopes, so findings route to the same skills.
 - Render: `deckto qa render <deck.pptx> --out <dir>` converts pptx -> pdf -> one jpg per slide so a model can actually look at the result.
 
 Defects that passed static QA and were caught only by the render pass, during this repo's own dogfood deck: content clipped off-slide (16:9 layout with 13.33x7.5in coordinates), an invisible comparison panel (light stroke on light background), and every diagram drawn ~40px too low (SVG `<text y>` is a baseline, not a top edge). None were invalid files; all were broken decks. The baseline defect is now prevented structurally by `cli/lib/svg-geometry.js` plus regression tests.
@@ -75,6 +75,7 @@ Both `rule`/`evidence` and `code`/`detail` field spellings are accepted.
 - `deckto doctor` — check node, LibreOffice, Poppler, config
 - `deckto qa storyline <file.md>` — structural checks on a storyline
 - `deckto qa static <deck.pptx>` — static XML checks
+- `deckto qa web <index.html>` — static checks on a rendered web deck
 - `deckto qa render <deck.pptx> --out <dir>` — rendered vision pass
 - `deckto qa report --findings <f> --iterations <n> [--out <dir>]` — merge findings, decide the loop
 - `deckto theme contrast <fg> <bg>` — WCAG contrast ratio

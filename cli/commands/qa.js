@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { okEnvelope, failEnvelope, emit } from '../lib/envelope.js';
 import { runChecks } from '../lib/pptx-static.js';
+import { runWebChecks } from '../lib/web-qa.js';
 import { validateStoryline } from '../lib/storyline.js';
 
 function loadConfig(root) {
@@ -27,8 +28,11 @@ export async function run(args, ctx) {
   if (sub === 'storyline') {
     return qaStoryline(rest, ctx, command);
   }
+  if (sub === 'web') {
+    return qaWeb(rest, ctx, command);
+  }
 
-  const msg = 'qa requires a subcommand: static | render | report';
+  const msg = 'qa requires a subcommand: storyline | static | render | web | report';
   emit(failEnvelope(command, ctx.version, msg), ctx);
   process.stderr.write(msg + '\n');
   return 1;
@@ -154,6 +158,40 @@ function qaStoryline(args, ctx, command) {
 
   emit(okEnvelope(command, ctx.version, data), ctx, lines.join('\n'));
   return result.errors.length ? 1 : 0;
+}
+
+// The web mirror of qaStatic: same finding codes and scopes so a scoped loop
+// routes web findings to the same skills the pptx findings go to.
+function qaWeb(args, ctx, command) {
+  const file = args.find((a) => !a.startsWith('--'));
+  if (!file || !fs.existsSync(file)) {
+    const msg = `web file not found: ${file ?? '<none>'}`;
+    emit(failEnvelope(command, ctx.version, msg), ctx);
+    process.stderr.write(msg + '\n');
+    return 1;
+  }
+
+  const cfg = loadConfig(ctx.root);
+  const html = fs.readFileSync(file, 'utf8');
+  const { findings, slideCount, floors } = runWebChecks(html, cfg);
+  const data = {
+    sub: 'web',
+    file: path.resolve(file),
+    slideCount,
+    floors,
+    findings,
+    thresholds: { minBodyPt: cfg.fonts.minBodyPt, minTitlePt: cfg.fonts.minTitlePt },
+    pass: findings.length === 0,
+  };
+
+  const lines = [`QA web — ${slideCount} slide(s), ${findings.length} finding(s)`];
+  for (const f of findings) {
+    lines.push(`  [${f.code}] ${f.slide ? `slide ${f.slide} ` : ''}(${f.scope}) — ${f.detail}`);
+  }
+  if (!findings.length) lines.push('  PASS — no findings');
+
+  const code = emit(okEnvelope(command, ctx.version, data), ctx, lines.join('\n'));
+  return findings.length ? 1 : code;
 }
 
 // A token is a flag VALUE (not a positional) if the previous arg is a flag that takes one.

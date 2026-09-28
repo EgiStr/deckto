@@ -165,9 +165,11 @@ Three composition rules keep the two from fighting: the strip never competes wit
 | Command | Purpose |
 |---|---|
 | `deckto init <slug>` | Scaffold `deck/<slug>/` |
+| `deckto build <slug> [--out <file>] [--web] [--all]` | Build `deck.pptx` (default), `web/index.html` (`--web`), or both (`--all`) |
 | `deckto doctor` | Check node, LibreOffice, Poppler, config |
 | `deckto qa storyline <file.md>` | Structural checks on a storyline |
 | `deckto qa static <deck.pptx>` | Static XML checks |
+| `deckto qa web <index.html>` | Static checks on a rendered web deck |
 | `deckto qa render <deck.pptx> --out <dir>` | Rendered vision pass |
 | `deckto qa report --findings <f> --iterations <n>` | Merge findings, decide the loop |
 | `deckto theme contrast <fg> <bg>` | WCAG contrast ratio |

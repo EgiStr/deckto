@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Website output format.** `deckto build <slug> --web` renders `storyline.md` into a single self-contained `deck/<slug>/web/index.html` — no network, no build step, one file you can open or host. It reuses the existing `layout` and `diagram:` blocks, so no storyline change was needed, and it carries the same `INSIGHT:` contract in a per-slide speaker-notes panel. The CLI is the only entry point; the renderer lives in `cli/lib/` because npm's `files` allowlist ships `cli/` but not `scripts/`.
 - **`deckto build <slug> [--out <file>] [--web] [--all]`.** One command for both formats: no flag builds the `.pptx` (the historical behaviour), `--web` builds only the HTML, `--all` builds both. `--json` emits the shared envelope.
+- **`deckto qa web <index.html>`.** Static checks on a rendered web deck, mirroring the pptx static pass: the same four rules, the same `VISUAL_MISSING` / `INSIGHT_MISSING` / `INSIGHT_EMPTY` / `FONTSIZE_LOW` codes, and the same `storyline` / `assets` / `deck` scopes — so a scoped loop routes web findings to the same skills the pptx findings go to. Adds one web-specific check, `EXTERNAL_REF`, because a deck that pulls a stylesheet from a CDN is no longer the single self-contained file the format promises.
 
 ### Changed
 
@@ -21,6 +22,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`stat-callout` tail collided with its own label.** The context line sat at a hard-coded `y=350`, so any `statLabel` that wrapped to two lines was overlapped by the `tail` line beneath it. The tail's position now derives from the wrapped label's height. Caught in the render pass; the file was valid and static QA passed.
 - **Two web layouts rendered their words but lost their visual.** `icon-rows` emitted an empty icon slot (no storyline ships an `icon:` field, and the generator draws a numbered circle instead), and a `chart-focus` checklist emitted bare `<ul>` bullets where the generator draws boxed checkboxes with a `✓`. Both shipped past a fully green static suite; the tests now assert the drawn structure and its CSS, not just that the text appeared.
 - **Bright accent was illegible on light fields in the web renderer.** `#F5A524` on `#F1F5FE` is 1.87:1. The accent is now two-tier: the dark variant is the default and dark slides re-point it at the bright one.
+- **The pptx and the web disagreed about which slides are dark.** The build darkened `title-dark` and `stat-callout`; the web renderer darkened only `title-dark`, so deck #2's stat slide was a dark field in PowerPoint and a light one in the browser. The web now follows the pptx, and a test derives the layout list from both files so the two cannot drift apart again.
 
 ## [0.1.0] — 2026-09-27
 

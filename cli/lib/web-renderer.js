@@ -148,7 +148,10 @@ function renderVisual(slide) {
 }
 
 function renderSlide(slide) {
-  const dark = slide.layout === 'title-dark';
+  // Must stay in step with cli/commands/build.js: the pptx darkens title-dark
+  // AND stat-callout. When the two disagreed, the same slide read as a dark
+  // field in the deck and a light one on the web.
+  const dark = slide.layout === 'title-dark' || slide.layout === 'stat-callout';
   return `
     <section class="slide${dark ? ' slide--dark' : ''}" data-slide="${esc(slide.slide)}" data-layout="${esc(slide.layout)}">
       <div class="slide-inner">

@@ -29,6 +29,7 @@ function usage() {
     'QA (hybrid: deterministic static checks + rendered vision pass):',
     '  deckto qa storyline <file.md> [--json]   Check storyline.md structure',
     '  deckto qa static <deck.pptx> [--json]    Static checks on a built deck',
+    '  deckto qa web <index.html> [--json]      Static checks on a rendered web deck',
     '  deckto qa render <deck.pptx> [--out <dir>] [--json]',
     '                                          Render pptx -> pdf -> jpg for vision review',
     '  deckto qa report --findings <file> [--iterations <n>] [--out <dir>] [--json]',
