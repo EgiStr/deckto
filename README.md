@@ -147,6 +147,26 @@ Support skills are composable — `audience-fit` and `brand-design` also work st
 
 ---
 
+## Output formats
+
+One `storyline.md`, two outputs — `deckto build <slug> --all` produces both.
+
+| Format | File | Best for |
+|---|---|---|
+| Deck | `deck/<slug>/deck.pptx` | Editing, sending, presenting from PowerPoint or Keynote |
+| Website | `deck/<slug>/web/index.html` | Sharing a link, presenting from a browser, reading on a phone |
+
+The website is **one self-contained file**: no network requests, no build step, no dependencies. Open it, or drop it on any static host. It reflows instead of embedding the fixed-size diagram strips, and it keeps the same contract — the same `layout` and `diagram:` fields, and the same `INSIGHT:` line frozen into each slide's speaker-notes panel. Nothing extra to author.
+
+Both formats then go through the same static QA, per format:
+
+```bash
+deckto qa static deck/my-idea/deck.pptx   # parsed from the OOXML
+deckto qa web deck/my-idea/web/index.html # parsed from the HTML
+```
+
+---
+
 ## Layout contract
 
 The pptx and its image assets are **not** redundant. Each carries a distinct band:
@@ -155,6 +175,8 @@ The pptx and its image assets are **not** redundant. Each carries a distinct ban
 |---|---|
 | `.pptx` | Title (selectable, QA-checked), footer, speaker notes (`INSIGHT:`) |
 | SVG strip (1232×460) | The body line + the diagram |
+
+(The website output does not use the strips — it re-lays the same `diagram:` data as live HTML, so its bands are derived from the theme rather than baked into a 1232×460 canvas.)
 
 Three composition rules keep the two from fighting: the strip never competes with the title, content sits in a fixed vertical rhythm (`TOP=120` … `BOT=410`, caption at `422`), and any filled block must *end above* the caption band.
 
@@ -200,8 +222,10 @@ Raise the font floors if your room is bigger than the default assumes.
 ## Development
 
 ```bash
-npm test        # 77 tests, node:test — no test framework
+npm test        # node:test — no test framework
 ```
+
+The generated `deck/<slug>/web/` output is not tracked; `deckto build <slug> --web` reproduces it byte-for-byte from the tracked `storyline.md` and `theme.json`.
 
 The dogfood deck in `deck/deckto-pitch/` is this repo's own pitch, built by these skills. Its hand-authored `storyline.md`, `design-spec.md`, and `theme.json` are tracked; the generated `.pptx`, assets, and renders are not — regenerate them with `node scripts/make-assets.js deckto-pitch` then `deckto build deckto-pitch` (add `--web` for `web/index.html`, or `--all` for both).
 
