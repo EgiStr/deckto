@@ -78,8 +78,8 @@ Rules:
 
 ## Phase 3 — Full-detail slides → storyline.md
 
-Write EVERY slide complete. Schema: `test/schema/storyline.schema.json` (the
-build and CLI validate against it).
+Write EVERY slide complete. Schema: `references/storyline.schema.json` (the
+build and CLI validate against the same shape).
 
 ```yaml
 master_title: "..."

@@ -111,7 +111,7 @@ review costs the user their pitch.
 ## Honesty note
 
 The four-rule judgment is human-design-principled (`[A]`/`[B]` sources recorded in
-`docs/research/frameworks-methodology.md`); the review applies them as structured
+`../../docs/research/frameworks-methodology.md`); the review applies them as structured
 checklists, not as a validated scoring model. Two passes of the same review will not
 produce identical numbers — findings with slide-level evidence remain actionable even
 when verdicts are judgment calls.

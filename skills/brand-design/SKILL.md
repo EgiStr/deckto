@@ -96,7 +96,8 @@ Revise on pushback (re-run Phase 2/3 — never hand-edit a failing ratio).
 
 On OK: fill the design-spec theme section (palette, typography, motif, contrast
 table, register → tone line feeding humanizer). If `design-spec.md` doesn't exist,
-write it from `pitchdeck-grinding/references/design-spec-template.md`.
+write it from `../pitchdeck-grinding/references/design-spec-template.md`
+(sibling skill — that path is relative to this skill's directory).
 
 **Never write theme into the file before GATE 2.**
 
