@@ -1,7 +1,7 @@
 // Web renderer contract: which pptx layouts have a responsive web equivalent.
 //
 // The web renderer consumes the SAME `layout` + `diagram` fields as
-// scripts/build-deck.js — the storyline is the single source of truth for both
+// cli/commands/build.js — the storyline is the single source of truth for both
 // outputs (spec §2, decision 1). That only holds if every layout the pptx path
 // accepts also has a web mapping; a layout that exists in one renderer and not
 // the other would silently produce a text-only web slide, which is rule 2

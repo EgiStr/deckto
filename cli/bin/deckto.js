@@ -10,6 +10,7 @@ const pkg = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const COMMANDS = {
   init: () => import('../commands/init.js'),
   doctor: () => import('../commands/doctor.js'),
+  build: () => import('../commands/build.js'),
   qa: () => import('../commands/qa.js'),
   theme: () => import('../commands/theme.js'),
   assets: () => import('../commands/assets.js'),
@@ -21,6 +22,8 @@ function usage() {
     '',
     'Usage:',
     '  deckto init <slug> [--json]        Scaffold deck/<slug>/ workspace',
+    '  deckto build <slug> [--out <file>] [--web] [--all] [--json]',
+    '                                      Build deck.pptx (default), web/index.html (--web), or both (--all)',
     '  deckto doctor [--json]             Check node, tools, and deck config',
     '',
     'QA (hybrid: deterministic static checks + rendered vision pass):',

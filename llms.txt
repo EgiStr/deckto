@@ -4,6 +4,13 @@
 
 deckto exists because slide *design* is solved but slide *thinking* is not. Most decks fail on structure, not on ideas. Four rules are enforced as machine-checked gates rather than advice: (1) every deck has a storyline, (2) visual over words, (3) every slide carries an insight, not just narration, (4) fonts large enough to read from the back of the room.
 
+## Output formats
+
+The same `storyline.md` renders two ways, because the storyline is the single source of truth:
+
+- **`.pptx`** (`deckto build <slug>`) — the editable deck. Carries the title, footer and speaker notes; the 1232x460 PNG strip carries the body line and the diagram.
+- **Website** (`deckto build <slug> --web`) — one self-contained `web/index.html`. No network, no build step, no dependencies: open it or host it. Reflows responsively instead of embedding the fixed-size strips, and keeps the `INSIGHT:` contract in a per-slide speaker-notes panel. It is the same six layouts, so nothing new to author.
+
 ## Quick start
 
 - Install (CLI): `npx deckto init my-idea`
@@ -14,8 +21,7 @@ deckto exists because slide *design* is solved but slide *thinking* is not. Most
 
 1. `pitchdeck-pitch-me` — extract the idea. One question per message, only for real ambiguity. Never invents facts.
 2. `pitchdeck-grinding` — grind the brief into a storyline: diverge on arcs, converge on one, then write a per-slide spine (assertion title, body, insight, evidence, layout).
-3. `pitchdeck-build` — build the .pptx with PptxGenJS; write `INSIGHT: <insight>` as the first line of every slide's speaker notes.
-4. `pitchdeck-review` — independent judgment; emits findings tagged with the scope that owns each defect.
+3. `pitchdeck-build` — build the .pptx with PptxGenJS; write `INSIGHT: <insight>` as the first line of every slide's speaker notes.4. `pitchdeck-review` — independent judgment; emits findings tagged with the scope that owns each defect.
 
 Each stage is fail-closed: it does not hand off until its gate passes.
 
@@ -65,6 +71,7 @@ Both `rule`/`evidence` and `code`/`detail` field spellings are accepted.
 ## CLI
 
 - `deckto init <slug>` — scaffold deck/<slug>/
+- `deckto build <slug> [--out <file>] [--web] [--all]` — build deck.pptx (default), web/index.html (`--web`), or both (`--all`)
 - `deckto doctor` — check node, LibreOffice, Poppler, config
 - `deckto qa storyline <file.md>` — structural checks on a storyline
 - `deckto qa static <deck.pptx>` — static XML checks
@@ -89,4 +96,4 @@ The .pptx and its image assets carry distinct bands and must not duplicate each 
 - `docs/research/frameworks-methodology.md` — the methodology source map with citations behind each skill
 - `docs/specs/` — design spec and implementation plan
 - `deck/deckto-pitch/` — the dogfood deck: this repo's own pitch, built by these skills
-- `npm test` — 77 tests via node:test
+- `npm test` — the full node:test suite

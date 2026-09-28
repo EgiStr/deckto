@@ -2,7 +2,7 @@
 // responsive HTML deck. Pure function: all inputs are passed in, nothing is
 // read from disk, no input is mutated.
 //
-// This is a second consumer of the SAME storyline as scripts/build-deck.js — the
+// This is a second consumer of the SAME storyline as cli/commands/build.js — the
 // storyline is the single source of truth for both outputs (spec decision 1).
 // The pptx path transcribes `diagram` into a fixed 1232x460 SVG strip; this path
 // re-lays-out the identical data as responsive HTML (spec decision 4), so the

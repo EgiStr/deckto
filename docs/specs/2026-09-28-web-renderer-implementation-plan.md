@@ -64,6 +64,10 @@ New `cli/commands/build.js`, registered in `cli/bin/deckto.js`.
 - `--all` → both.
 - Exit codes and `--json` envelope follow `qa.js`'s subcommand pattern
   (first non-flag token is the command; flags pass through intact).
+- Equivalence is asserted **part by part**, not byte by byte: pptxgenjs stamps
+  ZIP entries with the current time, so two runs of the *same* script already
+  produce different bytes. `test/build.test.js` unzips both builds and compares
+  every XML part and every media file.
 
 Then delete `scripts/build-deck.js` and update every reference to it —
 README line ~204, llms.txt, CHANGELOG. **Verify the scripts allowlist:** `build`
@@ -71,8 +75,9 @@ now ships under `cli/`, which *is* in the npm `files` allowlist; confirm no
 regression to `assets`, which stays in `scripts/` (and is therefore still
 unreachable via `npx` — file that as a known gap, do not silently fix it here).
 
-**Exit:** `node --test` green; `deckto build <slug>` byte-identical pptx to the
-pre-move script (build both, diff the output).
+**Exit:** `node --test` green; the pptx built by `deckto build <slug>` matches the
+pre-move script part for part (unzip both, compare every XML part and every media
+file), and neither `build` nor `assets` regressed.
 
 ## Phase 4 — `deckto qa web <file.html>`
 

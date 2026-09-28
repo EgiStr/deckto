@@ -23,7 +23,7 @@ storyline to gate and none of our four rules are enforced.
 
 `design-spec.md` is **not** an input. It is a human-readable rationale document;
 the machine-readable theme it describes is `theme.json`, which the renderer
-consumes. This mirrors `build-deck.js`, which reads `storyline.md` + `theme.json`
+consumes. This mirrors `cli/commands/build.js`, which reads `storyline.md` + `theme.json`
 and never parses the design spec.
 
 **Non-goal:** this does not replace `.pptx`, does not add a React/Vite scaffold,
@@ -49,7 +49,7 @@ deckto.config.json ───────┘         (pure function)
 
 The renderer is a **pure function**: same inputs, same bytes out. No network,
 no file reading of its own, no mutation of inputs. That makes it testable
-without a browser and keeps it symmetrical with `scripts/build-deck.js`
+without a browser and keeps it symmetrical with `cli/commands/build.js`
 (the pptx path is likewise a transcription, not an invention).
 
 **Correction (implementation-time, 2026-09-28).** Decision 5 originally read
@@ -101,7 +101,7 @@ The `body` ≤25-word budget and arc validation are already enforced upstream by
 
 | Condition | Behaviour |
 |---|---|
-| missing `storyline.md` / `theme.json` | exit 1, `missing <path>` (mirrors `build-deck.js`) |
+| missing `storyline.md` / `theme.json` | exit 1, `missing <path>` (mirrors `cli/commands/build.js`) |
 | missing `deckto.config.json` | exit 1, `missing <path>` (needed for font floors) |
 | unknown `layout` | exit 1, `slide N: unknown layout "<x>" for web renderer` |
 | layout present, `diagram` block absent | exit 1, `slide N: missing diagram block for layout "<x>"` |
@@ -148,7 +148,7 @@ same split the pptx path uses (static check now, rendered vision pass later).
 - **Embed the PNG strips as `<img>`** — responsive *page*, unresponsive
   *content*; the slide would letterbox on phones. Rejected: it answers "website"
   while delivering fixed canvas.
-- **`scripts/build-web.js` next to `build-deck.js`** — structurally consistent,
+- **`scripts/build-web.js` next to the pptx build** — structurally consistent,
   but `scripts/` is not in the npm `files` allowlist, so `npx deckto` users
   could not invoke it. Rejected on distribution grounds (decision 3).
 - **React/Vite scaffold** — full bolt-slides parity, but imposes `npm install`
