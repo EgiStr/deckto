@@ -40,7 +40,12 @@ export async function run(args, ctx) {
   const wantPptx = wantAll || !args.includes('--web');
   const wantWeb = wantAll || args.includes('--web');
 
-  const DECK = path.join(ctx.root, 'deck', slug);
+  // The deck belongs to the caller, not to the package: `deckto init` writes
+  // deck/<slug>/ under the working directory and every other command reads the
+  // user's files from there. Resolving against ctx.root made an installed user's
+  // deck invisible — the command reported missing node_modules/deckto/deck/...
+  // for a deck sitting in the directory it was run from.
+  const DECK = path.join(process.cwd(), 'deck', slug);
   const storylinePath = path.join(DECK, 'storyline.md');
   const themePath = path.join(DECK, 'theme.json');
   const missing = [storylinePath, themePath].filter((p) => !fs.existsSync(p));

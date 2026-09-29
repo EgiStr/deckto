@@ -4,25 +4,37 @@ All notable changes to deckto will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.1] — 2026-09-28
+
+Adds a second output format — a self-contained website — and moves the deck builder off `scripts/` so it actually ships.
 
 ### Added
 
-- **Website output format.** `deckto build <slug> --web` renders `storyline.md` into a single self-contained `deck/<slug>/web/index.html` — no network, no build step, one file you can open or host. It reuses the existing `layout` and `diagram:` blocks, so no storyline change was needed, and it carries the same `INSIGHT:` contract in a per-slide speaker-notes panel. The CLI is the only entry point; the renderer lives in `cli/lib/` because npm's `files` allowlist ships `cli/` but not `scripts/`.
+- **Website output format.** `deckto build <slug> --web` renders `storyline.md` into a single self-contained `deck/<slug>/web/index.html` — no network, no build step, one file you can open or host. It reuses the existing `layout` and `diagram:` blocks, so no storyline change was needed, and it carries the same `INSIGHT:` contract in a per-slide speaker-notes panel.
 - **`deckto build <slug> [--out <file>] [--web] [--all]`.** One command for both formats: no flag builds the `.pptx` (the historical behaviour), `--web` builds only the HTML, `--all` builds both. `--json` emits the shared envelope.
 - **`deckto qa web <index.html>`.** Static checks on a rendered web deck, mirroring the pptx static pass: the same four rules, the same `VISUAL_MISSING` / `INSIGHT_MISSING` / `INSIGHT_EMPTY` / `FONTSIZE_LOW` codes, and the same `storyline` / `assets` / `deck` scopes — so a scoped loop routes web findings to the same skills the pptx findings go to. Adds one web-specific check, `EXTERNAL_REF`, because a deck that pulls a stylesheet from a CDN is no longer the single self-contained file the format promises.
+- `pitchdeck-grinding` ships its own copy of the storyline schema, so the skill works when installed on its own.
 
 ### Changed
 
-- **One deck generator, not two.** `scripts/make-assets.js` and `scripts/build-deck.js` now build any deck from `deck/<slug>/storyline.md` + `theme.json`, so the deck-#1-specific `scripts/make-dogfood-assets.js` and `scripts/build-dogfood.js` are gone. `deck/deckto-pitch/` gained the `theme.json` and per-slide `diagram:` blocks it needs to build through the generic path, and was regenerated and visually re-verified.
-- **The pptx build moved from `scripts/build-deck.js` to `deckto build`.** That script was unreachable from `npx` because npm's `files` allowlist ships `cli/` and `skills/` but not `scripts/`, so the deck generator was invisible to anyone who installed the package. It is now a line-for-line transcription in `cli/commands/build.js`, and `test/build.test.js` pins the transcription directly: every slide reaches the deck with its title, its diagram, and its `INSIGHT:` notes line. Byte equality is not asserted — pptxgenjs stamps ZIP entries with the current time, so two runs of the *same* script already differ.
+- **The pptx build moved from `scripts/build-deck.js` to `deckto build`.** That script was unreachable from `npx`: npm's `files` allowlist ships `cli/` and `skills/`, not `scripts/`, so the deck generator was invisible to anyone who installed the package. It is now a line-for-line transcription in `cli/commands/build.js`, and `test/build.test.js` pins the transcription directly — every slide reaches the deck with its title, its diagram, and its `INSIGHT:` notes line. Byte equality is not asserted: pptxgenjs stamps ZIP entries with the current time, so two runs of the *same* script already differ.
+- `scripts/make-assets.js` still lives under `scripts/` and is therefore still unreachable from `npx`. This is a known gap, not a regression — it is the next thing to move.
+- One deck generator, not two. `scripts/make-assets.js` and `scripts/build-deck.js` build any deck from `deck/<slug>/storyline.md` + `theme.json`, so the deck-#1-specific `scripts/make-dogfood-assets.js` and `scripts/build-dogfood.js` are gone. `deck/deckto-pitch/` gained the `theme.json` and per-slide `diagram:` blocks it needs to build through the generic path, and was regenerated and visually re-verified.
 
 ### Fixed
 
-- **`stat-callout` tail collided with its own label.** The context line sat at a hard-coded `y=350`, so any `statLabel` that wrapped to two lines was overlapped by the `tail` line beneath it. The tail's position now derives from the wrapped label's height. Caught in the render pass; the file was valid and static QA passed.
 - **Two web layouts rendered their words but lost their visual.** `icon-rows` emitted an empty icon slot (no storyline ships an `icon:` field, and the generator draws a numbered circle instead), and a `chart-focus` checklist emitted bare `<ul>` bullets where the generator draws boxed checkboxes with a `✓`. Both shipped past a fully green static suite; the tests now assert the drawn structure and its CSS, not just that the text appeared.
 - **Bright accent was illegible on light fields in the web renderer.** `#F5A524` on `#F1F5FE` is 1.87:1. The accent is now two-tier: the dark variant is the default and dark slides re-point it at the bright one.
-- **The pptx and the web disagreed about which slides are dark.** The build darkened `title-dark` and `stat-callout`; the web renderer darkened only `title-dark`, so deck #2's stat slide was a dark field in PowerPoint and a light one in the browser. The web now follows the pptx, and a test derives the layout list from both files so the two cannot drift apart again.
+- **The pptx and the web disagreed about which slides are dark.** The build darkened `title-dark` and `stat-callout`; the web renderer darkened only `title-dark`, so a stat slide was a dark field in PowerPoint and a light one in the browser. The web now follows the pptx, and a test derives the layout list from both files so the two cannot drift apart again.
+- **Three dead cross-file references in skills.** `brand-design` pointed at a sibling skill's file, `pitchdeck-grinding` at a repo-root schema, and `pitchdeck-review` at a repo-root doc — each written as if the reader stood at the repo root. All three now resolve from the skill's own directory, enforced by a new contract test.
+- **`stat-callout` tail collided with its own label.** The context line sat at a hard-coded `y=350`, so any `statLabel` that wrapped to two lines was overlapped by the `tail` line beneath it. The tail's position now derives from the wrapped label's height. Caught in the render pass; the file was valid and static QA passed.
+- **`pptxgenjs` was in `devDependencies`, so `deckto build` could not run for anyone who installed the package.** npm does not install dev dependencies for consumers; the import only worked here because the repo's own `node_modules` had it. It is a runtime dependency now, and a test walks every bare import under `cli/` and fails if any is undeclared or dev-only.
+- **`deckto build` looked for the deck inside the installed package.** `deck/<slug>/` was resolved against the package directory, so an installed user got `missing .../node_modules/deckto/deck/<slug>/storyline.md` for a deck sitting right next to where they ran the command. It resolves from the working directory now, matching where `deckto init` writes and where every other command reads.
+
+### Notes
+
+- 131 tests, `node:test`, no test framework.
+- 0.1.1 was verified from a clean install outside the repo: `init` → `qa storyline` → `build --all` → `qa static` (12 slides, 0 findings) → `qa web` (12 slides, 0 findings), all run against the packed tarball in a temp directory with no repo `node_modules` available.
 
 ## [0.1.0] — 2026-09-27
 

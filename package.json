@@ -1,6 +1,6 @@
 {
   "name": "deckto",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Structured AI skills pipeline for professional pitch decks — from rough idea to QA-passed .pptx",
   "type": "module",
   "files": [
@@ -44,9 +44,7 @@
   },
   "dependencies": {
     "fflate": "^0.8.3",
+    "pptxgenjs": "^4.0.1",
     "yaml": "^2.9.1"
-  },
-  "devDependencies": {
-    "pptxgenjs": "^4.0.1"
   }
 }
